@@ -1,16 +1,16 @@
 package Exc;
 
 /**
-* A custom exception type thrown while reading entries in a .csv file.
+* A custom exception type thrown while processing entries read from a .csv file.
 * 
 * @author Philippe Lizotte
 */
-public class SyntaxException extends Exception {
+public class SemanticException extends Exception {
 	/**
 	* Simple default constructor
 	*/
-	public SyntaxException() {
-		super("A syntax error occured!");
+	public SemanticException() {
+		super("A semantic error occured!");
 	}
 	
 	/**
@@ -18,7 +18,7 @@ public class SyntaxException extends Exception {
 	*
 	* @param message custom message to be displayed
 	*/
-	public SyntaxException(String message) {
+	public SemanticException(String message) {
 		super(message);
 	}
 	
@@ -29,7 +29,7 @@ public class SyntaxException extends Exception {
 	* @param errorType string that specifies what type of error was thrown
 	* @param message custom message to be displayed
 	*/
-	public SyntaxException(String errorType, String record) {
+	public SemanticException(String errorType, String record) {
 		super("Error: " + errorType + "\nRecord: " + record);
 	}
 }

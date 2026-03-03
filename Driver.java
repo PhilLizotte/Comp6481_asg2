@@ -31,6 +31,16 @@ class Driver {
 	
 	// -- Main Parts --
 	
+	/**
+	* Part 1 of the driver.
+	* Reads all books from a list of .csv files and outputs them
+	* to files sorted by genre. Any records with syntax errors
+	* are put in their own .txt file instead of their respective
+	* genre file. A custom error is thrown and handled whenever
+	* a record with a syntax error is read.
+	* 
+	* @author Philippe Lizotte
+	*/
 	public static void do_part1() {
 		Scanner s;
 		String inputDir = "input\\";
@@ -183,6 +193,9 @@ class Driver {
 		}
 	}
 	
+	/**
+	* Main function. Only calls the main "parts" of the driver.
+	*/
 	public static void main(String[] args) {
 		do_part1();
 	}

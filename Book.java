@@ -12,7 +12,6 @@ import Exc.*;
 // - Two books are considered equal if they have the same ISBN and price.
 // - Also has a basic toString and equals override.
 
-// *** TO-DO: Proper javadoc for class/author(s)/whatever else ***
 /**
 * A Book class used mostly for storing book information.
 * 
