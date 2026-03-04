@@ -1,19 +1,11 @@
-import java.io.Serializable;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 
 import java.lang.StringBuilder;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import Exc.SyntaxException;
-import Exc.TooManyFieldsException;
-import Exc.TooFewFieldsException;
-import Exc.UnknownGenreException;
-import Exc.MissingFieldException;
+import Exc.*;
 
 class Driver {
 	// Helper functions
@@ -182,7 +174,7 @@ class Driver {
 			}
 			
 			String outputPath = "part1_output/"; // os neutral fix
-			new java.io.File(outputPath).mkdirs(); //edit: create output folder if it doesn't exist; prevents errors
+			new File(outputPath).mkdirs(); //edit: create output folder if it doesn't exist; prevents errors
 			Map<String, String> outputFileNames = new HashMap<>();
 			outputFileNames.put("CCB", "Cartoons_Comics.csv");
 			outputFileNames.put("HCB", "Hobbies_Collectibles.csv");
@@ -209,35 +201,232 @@ class Driver {
 			System.exit(1);
 		}
 	}
-
+	/**
+	 * Part 2
+	 * -
+	 * Reads 8 genre CSV files produced in Part 1 (assuming its syntactically valid),
+	 * validates each record for semantic correctness (price, year, ISBN-10/ISBN-13) and
+	 * writes semantic errors to {@code semantic_error_file.txt}.
+	 *
+	 * For each genre CSV file, this method performs 2 passes:
+	 *  Pass 1: counts how many semantically valid records exist (and logs invalid ones).</li>
+	 *  Pass 2: allocates 1 {@code Book[]} of the exact required size, fills it with valid
+	 *       {@code Book} objects and serializes the array into a {@code .ser} file.</li>
+	 *
+	 * Output {@code .ser} files are written to the {@code part2_output/} directory.
+	 * If a genre CSV file is missing then an empty {@code Book[]} is serialized for that file.
+	 *
+	 * @author Sami Khalayli
+	 */
 	public static void do_part2() {
 		//Hardcode filenames from part 1
 
-		String cartoonsComicsCsv = "Cartoons_Comics.csv";
-		String hobbiesCollectiblesCsv = "Hobbies_Collectibles.csv";
-		String moviesTvBooksCsv = "Movies_TV_Books.csv";
-		String musicRadioBooksCsv = "Music_Radio_Books.csv";
-		String nostalgiaEclecticBooksCsv = "Nostalgia_Eclectic_Books.csv";
-		String oldTimeRadioCsv = "Old_Time_Radio.csv";
-		String sportsSportsMemorabiliaCsv = "Sports_Sports_Memorabilia.csv";
-		String trainsPlanesAutomobilesCsv = "Trains_Planes_Automobiles.csv";
+		String[] part1GenreCsvFiles = {
+				"Cartoons_Comics.csv",
+				"Hobbies_Collectibles.csv",
+				"Movies_TV_Books.csv",
+				"Music_Radio_Books.csv",
+				"Nostalgia_Eclectic_Books.csv",
+				"Old_Time_Radio.csv",
+				"Sports_Sports_Memorabilia.csv",
+				"Trains_Planes_Automobiles.csv"
+		};
 
-		String syntaxErrorTxt = "syntax_error_file.txt";
-		String inputDir = "part1_output/"
+		String inputDir = "part1_output/";
 		//Assuming 8 genres
-
 		Scanner sc = null;
-		for (int i = 0; i < 8; i++)
-		{
-			s = new Scanner(new FileReader(inputDir + inputFileName));
-		}
+		FileWriter semErr = null;
+		String record;
+		String[] recordFields;
+		String outputDir = "part2_output/";
 
+		try {
+
+			new File(outputDir).mkdirs(); // output folder exists
+
+
+
+			String semanticErrPath = outputDir + "semantic_error_file.txt";
+			semErr = new FileWriter(semanticErrPath);
+
+			// ----------------- PASS 1 -----------------
+			// Used to check how many valid Book will be stored
+
+			for (int i = 0; i < part1GenreCsvFiles.length; i++) {
+
+				String inName = part1GenreCsvFiles[i];
+				String inPath = inputDir + inName;
+				String serPath = outputDir + inName + ".ser";
+				int validCount = 0;
+				boolean doneHeader = false;
+				// Pass 1 scope try; flow continues after pass 1
+				try {
+				sc = new Scanner(new FileReader(inPath));
+				//read till EOF (Each file)
+				while (sc.hasNextLine()) {
+					record = sc.nextLine();
+					if (record == null || record.trim().isEmpty()) continue;
+
+					// records to clean fields
+					// [0] = title
+					// [1] = authors
+					// [2] = price
+					// [3] = isbn
+					// [4] = genre
+					// [5] = year
+					try {
+
+						recordFields = record.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+					for (int j = 0; j < recordFields.length; j++) {
+						recordFields[j] = recordFields[j].trim();
+					}
+						if (recordFields.length != 6) {
+							if (!doneHeader) {
+								semErr.write("semantic error in file: " + inName + "\n====================\n");
+								doneHeader = true;
+							}
+							semErr.write("Error: unexpected field count (expected 6, got " + recordFields.length + ")\n");
+							semErr.write("Record: " + record + "\n\n");
+							continue;
+						}
+
+						// Create Book, semantic validation happens in book class
+						Book book = new Book(
+								recordFields[0],                           // title
+								recordFields[1],                           // authors
+								Double.parseDouble(recordFields[2]),       // price
+								recordFields[3],                           // isbn
+								recordFields[4],                           // genre
+								Integer.parseInt(recordFields[5])          // year
+						);
+						validCount++;
+					} catch (BadPriceException | BadYearException | BadIsbn10Exception | BadIsbn13Exception e) {
+						if (!doneHeader) {
+							semErr.write("semantic error in file: " + inName + "\n====================\n");
+							doneHeader = true;
+						}
+						semErr.write("Error: " + e.getMessage() + "\n");
+						semErr.write("Record: " + record + "\n\n");
+
+					} catch (NumberFormatException e) {
+						if (!doneHeader) {
+							semErr.write("semantic error in file: " + inName + "\n====================\n");
+							doneHeader = true;
+						}
+						semErr.write("Error: invalid number format (price/year)\n");
+						semErr.write("Record: " + record + "\n\n");
+					}
+
+				}
+					// good for long runs
+					semErr.flush();
+
+				} catch (FileNotFoundException e) {
+					System.out.println("File not found (skipping + serialize empty): " + inPath);
+					validCount = 0;
+
+				} catch (IOException e) {
+					System.out.println("IO error during pass1 for " + inName + ": " + e.getMessage());
+
+				} finally {
+					if (sc != null) sc.close();
+                }
+
+				System.out.println("Pass 1 validCount for " + inName + " = " + validCount);
+
+				// ----------------- PASS 2 -----------------
+				// Store the books and serialize
+				Scanner sc2 = null;
+				Book[] bkAry = null;
+				try {
+				sc2 = new Scanner(new FileReader(inPath));
+				bkAry = new Book[validCount];
+				int booksAdded = 0;
+
+					while (sc2.hasNextLine()) {
+						record = sc2.nextLine();
+						if (record == null || record.trim().isEmpty()) continue;
+
+						// records to clean fields
+						// [0] = title
+						// [1] = authors
+						// [2] = price
+						// [3] = isbn
+						// [4] = genre
+						// [5] = year
+						try {
+
+							recordFields = record.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+							for (int j = 0; j < recordFields.length; j++) {
+								recordFields[j] = recordFields[j].trim();
+							}
+							if (recordFields.length != 6) {
+								continue;
+							}
+
+							// Create Book, semantic validation happens in book class
+							Book book = new Book(
+									recordFields[0],                           // title
+									recordFields[1],                           // authors
+									Double.parseDouble(recordFields[2]),       // price
+									recordFields[3],                           // isbn
+									recordFields[4],                           // genre
+									Integer.parseInt(recordFields[5])          // year
+							);
+							if (booksAdded < bkAry.length) {   //guard
+								bkAry[booksAdded] = book;
+								booksAdded++;
+							}
+							if (booksAdded == validCount){
+								System.out.println("WARNING: books ary is full. There may be output truncated if you see this more than once per file.");
+							}
+
+						} catch (BadPriceException | BadYearException | BadIsbn10Exception | BadIsbn13Exception | NumberFormatException e) {
+						// skip (already logged in pass 1)
+					}
+
+				}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println("File not found in pass2: " + inPath + " (serializing empty array)");
+					bkAry = new Book[0]; // serialize empty ary
+
+
+				} finally {
+					if (sc2 != null) sc2.close();
+				}
+
+				ObjectOutputStream oos = null;
+
+				try {
+					oos = new ObjectOutputStream(new FileOutputStream(serPath));
+					oos.writeObject(bkAry);
+
+				} catch (IOException e) {
+					System.out.println("[Serialization] Error in OOS." + e.getMessage() + " exiting.");
+					System.exit(0);
+				}
+				finally {
+					if (oos != null) try { oos.close(); } catch (IOException e) {}
+				}
 	}
-	
-	/**
-	* Main function. Only calls the main "parts" of the driver.
-	*/
+			semErr.close();
+
+		} catch(IOException e)
+		{
+			System.out.println("IOEXCEPTION" + e.getMessage() + "exiting.. ");
+			System.exit(0);
+		}
+	}
+
+
+
+					/**
+                    * Main function. Only calls the main "parts" of the driver.
+                    */
 	public static void main(String[] args) {
 		do_part1();
+		do_part2();
 	}
 }
