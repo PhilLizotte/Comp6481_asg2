@@ -102,8 +102,13 @@ class Driver {
 						}
 						//edit: Dont write this record to genre outputs
 						if (charCounter % 2 == 1) {
-							anySyntaxErrors = true;
-							errorBuilder.append("Error: unbalanced quotes\n").append("Record: ").append(record).append("\n\n");
+							try {
+								throw new TooFewFieldsException(record); // classify as syntax err
+							} catch (SyntaxException e) {
+								syntaxOk = false;
+								anySyntaxErrors = true;
+								errorBuilder.append(e.getMessage()).append("\n\n");
+							}
 							continue;
 						}
 						
@@ -235,7 +240,7 @@ class Driver {
 		String inputDir = "part1_output/";
 		//Assuming 8 genres
 		Scanner sc = null;
-		FileWriter semErr = null;
+		PrintWriter semErr = null;
 		String record;
 		String[] recordFields;
 		String outputDir = "part2_output/";
@@ -247,7 +252,7 @@ class Driver {
 
 
 			String semanticErrPath = outputDir + "semantic_error_file.txt";
-			semErr = new FileWriter(semanticErrPath);
+			semErr = new PrintWriter(semanticErrPath);
 
 			// ----------------- PASS 1 -----------------
 			// Used to check how many valid Book will be stored
@@ -282,11 +287,11 @@ class Driver {
 					}
 						if (recordFields.length != 6) {
 							if (!doneHeader) {
-								semErr.write("semantic error in file: " + inName + "\n====================\n");
+								semErr.print("semantic error in file: " + inName + "\n====================\n");
 								doneHeader = true;
 							}
-							semErr.write("Error: unexpected field count (expected 6, got " + recordFields.length + ")\n");
-							semErr.write("Record: " + record + "\n\n");
+							semErr.print("Error: unexpected field count (expected 6, got " + recordFields.length + ")\n");
+							semErr.print("Record: " + record + "\n\n");
 							continue;
 						}
 
@@ -302,19 +307,19 @@ class Driver {
 						validCount++;
 					} catch (BadPriceException | BadYearException | BadIsbn10Exception | BadIsbn13Exception e) {
 						if (!doneHeader) {
-							semErr.write("semantic error in file: " + inName + "\n====================\n");
+							semErr.print("semantic error in file: " + inName + "\n====================\n");
 							doneHeader = true;
 						}
-						semErr.write("Error: " + e.getMessage() + "\n");
-						semErr.write("Record: " + record + "\n\n");
+						semErr.print("Error: " + e.getMessage() + "\n");
+						semErr.print("Record: " + record + "\n\n");
 
 					} catch (NumberFormatException e) {
 						if (!doneHeader) {
-							semErr.write("semantic error in file: " + inName + "\n====================\n");
+							semErr.print("semantic error in file: " + inName + "\n====================\n");
 							doneHeader = true;
 						}
-						semErr.write("Error: invalid number format (price/year)\n");
-						semErr.write("Record: " + record + "\n\n");
+						semErr.print("Error: invalid number format (price/year)\n");
+						semErr.print("Record: " + record + "\n\n");
 					}
 
 				}
@@ -324,9 +329,6 @@ class Driver {
 				} catch (FileNotFoundException e) {
 					System.out.println("File not found (skipping + serialize empty): " + inPath);
 					validCount = 0;
-
-				} catch (IOException e) {
-					System.out.println("IO error during pass1 for " + inName + ": " + e.getMessage());
 
 				} finally {
 					if (sc != null) sc.close();
