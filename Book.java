@@ -101,7 +101,17 @@ class Book implements Serializable {
 		if (newISBN.length() == 10) {
 			int sum = 0;
 			for (int i = 0; i < 10; i++) {
-				sum += (10 - (i + 1)) * Integer.valueOf(newISBN.charAt(i));
+				char c = newISBN.charAt(i);
+				int digit;
+
+				if (i == 9 && (c == 'X' || c == 'x')) { //fixed: X handling
+					digit = 10;                 // ISBN10 digit X means 10
+				} else if (c >= '0' && c <= '9') {
+					digit = c - '0';
+				} else {
+					throw new BadIsbn10Exception("Invalid ISBN-10 character: " + c);
+				}
+				sum += (10 - i) * digit;               // fixed: weights 10->1
 			}
 			
 			if (sum % 11 != 0) {
@@ -110,8 +120,9 @@ class Book implements Serializable {
 		} else if (newISBN.length() == 13) {
 			int sum = 0;
 			for (int i = 0; i < 13; i++) {
-				int scalar = i % 2 == 0 ? 1 : 3;
-				sum += scalar * Integer.valueOf(newISBN.charAt(i));
+				int digit = newISBN.charAt(i) - '0';   // fixed: get numeric digit
+				int weight = (i % 2 == 0) ? 1 : 3;     // weights 1,3,1,3 .....
+				sum += weight * digit;
 			}
 			
 			if (sum % 10 != 0) {
@@ -216,7 +227,7 @@ class Book implements Serializable {
         if (obj == null || obj.getClass() != Book.class) return false;
 		
 		Book that = (Book) obj;
-		return this.ISBN == that.ISBN && this.price == that.price;
+		return this.ISBN.equals(that.ISBN) && this.price == that.price; // edit: string .equals
 	}
 	
 	/**
