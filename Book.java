@@ -101,7 +101,8 @@ class Book implements Serializable {
 		if (newISBN.length() == 10) {
 			int sum = 0;
 			for (int i = 0; i < 10; i++) {
-				sum += (10 - (i + 1)) * Integer.valueOf(newISBN.charAt(i));
+				int digit = newISBN.charAt(i) - '0';   // fixed: get numeric digit not ASCII
+				sum += (10 - i) * digit;               // fixed: weights 10->1
 			}
 			
 			if (sum % 11 != 0) {
@@ -110,8 +111,9 @@ class Book implements Serializable {
 		} else if (newISBN.length() == 13) {
 			int sum = 0;
 			for (int i = 0; i < 13; i++) {
-				int scalar = i % 2 == 0 ? 1 : 3;
-				sum += scalar * Integer.valueOf(newISBN.charAt(i));
+				int digit = newISBN.charAt(i) - '0';   // fixed: get numeric digit
+				int weight = (i % 2 == 0) ? 1 : 3;     // weights 1,3,1,3 .....
+				sum += weight * digit;
 			}
 			
 			if (sum % 10 != 0) {

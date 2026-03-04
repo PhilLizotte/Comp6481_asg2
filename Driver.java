@@ -43,7 +43,7 @@ class Driver {
 	*/
 	public static void do_part1() {
 		Scanner s;
-		String inputDir = "input\\";
+		String inputDir = "input/"; //fix: OS neutral
 		String inputFileName = "part1_input_file_names.txt";
 		
 		int numBfs = 0;
@@ -97,16 +97,21 @@ class Driver {
 						// Process the record. First, make sure it has the right number of fields.
 						record = s.nextLine();
 						genre = "syntaxErrors";
+
+						boolean syntaxOk = true;   //edit: new flag so bad records don't go to genre files
+						String genreLocal = null;  //edit: store genre only if record is valid
 						
 						// Count the number of double-quotes to ensure proper quote formatting
 						charCounter = 0;
 						for (int j = 0; j < record.length(); j++) {
-							if (record.charAt(i) == '\"') {
+							if (record.charAt(j) == '\"') { // fixed: wrong index
 								charCounter++;
 							}
 						}
+						//edit: Dont write this record to genre outputs
 						if (charCounter % 2 == 1) {
-							builders.get("syntaxErrors").append(record);
+							anySyntaxErrors = true;
+							errorBuilder.append("Error: unbalanced quotes\n").append("Record: ").append(record).append("\n\n");
 							continue;
 						}
 						
@@ -115,7 +120,12 @@ class Driver {
 						// The second argument (-1) ensures that trailing empty strings
 						//   (blank year fields) are not discarded.
 						recordFields = record.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-						
+
+						// Fixed: trim
+						for (int j = 0; j < recordFields.length; j++) {
+							recordFields[j] = recordFields[j].trim();
+						}
+
 						// Look for syntax errors
 						try {
 							if (recordFields.length > 6) {
@@ -124,16 +134,17 @@ class Driver {
 								// throw new TooFewFieldsException(arrayToString(recordFields));
 								throw new TooFewFieldsException(record);
 							}
-							
+
+							// change equals to isEmpty since we trimmed already
 							for (int j = 0; j < recordFields.length; j++) {
-								if (recordFields[j].equals(""))
+								if (recordFields[j].isEmpty())
 									throw new MissingFieldException(fieldNames[j], record);
 							}
-							
-							genre = recordFields[4];
+
+							genreLocal = recordFields[4]; // edit: use local var helps with the general structure of parsing
 							isValidGenre = false;
 							for (int j = 0; j < genres.length; j++) {
-								if (genre.equals(genres[j])) {
+								if (genreLocal.equals(genres[j])) { //edit : updated var
 									isValidGenre = true;
 									break;
 								}
@@ -143,21 +154,26 @@ class Driver {
 							}
 							
 						} catch(SyntaxException e) {
-							errorBuilder.append(e.getMessage() + "\n\n");
+							syntaxOk = false; // fix: mark invalid; don't write to genre output
 							anySyntaxErrors = true;
-						}  finally {
-							// Whether or not an exception was thrown, append the line
-							//  to its stringbuilder by genre (or to the collection of line with syntax errors)
-							if (!builders.containsKey(genre)) genre = "syntaxErrors";
-							
-							thisBuilder = builders.get(genre);
-							
-							if (thisBuilder.length() != 0) thisBuilder.append("\n");
-							thisBuilder.append(record);
-							
-							if (anySyntaxErrors) System.out.print(errorBuilder.toString());
+							errorBuilder.append(e.getMessage() + "\n\n");
+						}
+						// edit: write only syntactically correct records. Finally was writing everything about nothing
+						if (syntaxOk) {
+							StringBuilder b = builders.get(genreLocal);
+							if (b.length() != 0) b.append("\n");
+							b.append(record);
 						}
 					}
+					// edit: append file's error block once
+					if (anySyntaxErrors) {
+						StringBuilder errOut = builders.get("syntaxErrors");
+						if (errOut.length() != 0) errOut.append("\n");
+						errOut.append(errorBuilder.toString());
+					}
+
+					// edit: for debug purposes, print the block once per file
+					if (anySyntaxErrors) System.out.print(errorBuilder.toString());
 					
 					s.close();
 				} catch (FileNotFoundException e) {
@@ -165,7 +181,8 @@ class Driver {
 				}
 			}
 			
-			String outputPath = "part1_output\\";
+			String outputPath = "part1_output/"; // os neutral fix
+			new java.io.File(outputPath).mkdirs(); //edit: create output folder if it doesn't exist; prevents errors
 			Map<String, String> outputFileNames = new HashMap<>();
 			outputFileNames.put("CCB", "Cartoons_Comics.csv");
 			outputFileNames.put("HCB", "Hobbies_Collectibles.csv");
@@ -191,6 +208,10 @@ class Driver {
 			System.out.println("Input file " + inputDir + inputFileName + " does not exist! Exiting program...");
 			System.exit(1);
 		}
+	}
+
+	public static void do_part2() {
+
 	}
 	
 	/**
