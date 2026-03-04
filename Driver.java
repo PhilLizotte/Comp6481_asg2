@@ -158,7 +158,7 @@ class Driver {
 							anySyntaxErrors = true;
 							errorBuilder.append(e.getMessage() + "\n\n");
 						}
-						// edit: write only syntactically correct records. Finally was writing everything about nothing
+						// edit: write only syntactically correct records. Clearer structure
 						if (syntaxOk) {
 							StringBuilder b = builders.get(genreLocal);
 							if (b.length() != 0) b.append("\n");
@@ -211,6 +211,26 @@ class Driver {
 	}
 
 	public static void do_part2() {
+		//Hardcode filenames from part 1
+
+		String cartoonsComicsCsv = "Cartoons_Comics.csv";
+		String hobbiesCollectiblesCsv = "Hobbies_Collectibles.csv";
+		String moviesTvBooksCsv = "Movies_TV_Books.csv";
+		String musicRadioBooksCsv = "Music_Radio_Books.csv";
+		String nostalgiaEclecticBooksCsv = "Nostalgia_Eclectic_Books.csv";
+		String oldTimeRadioCsv = "Old_Time_Radio.csv";
+		String sportsSportsMemorabiliaCsv = "Sports_Sports_Memorabilia.csv";
+		String trainsPlanesAutomobilesCsv = "Trains_Planes_Automobiles.csv";
+
+		String syntaxErrorTxt = "syntax_error_file.txt";
+		String inputDir = "part1_output/"
+		//Assuming 8 genres
+
+		Scanner sc = null;
+		for (int i = 0; i < 8; i++)
+		{
+			s = new Scanner(new FileReader(inputDir + inputFileName));
+		}
 
 	}
 	
