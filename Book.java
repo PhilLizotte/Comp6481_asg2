@@ -43,6 +43,21 @@ class Book implements Serializable {
 	}
 	
 	/**
+	* Simple copy constructor.
+	*/
+	public Book(Book that)
+	throws BadPriceException, BadIsbn10Exception, BadIsbn13Exception, BadYearException {
+		setTitle(that.getTitle());
+		setAuthors(that.getAuthors());
+		setPrice(that.getPrice());
+		setISBN(that.getISBN());
+		setGenre(that.getGenre());
+		setYear(that.getYear());
+		
+		createdBooks++;
+	}
+	
+	/**
 	* Simple getter
 	*
 	* @return       title property
