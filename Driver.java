@@ -1,3 +1,10 @@
+// -----------------------------------------------------
+// Assignment 2
+// COMP 6481
+// Written by: Philippe Lizotte 40261140, Sami Khalayli 40327380
+// Due Date: March 6th, 2026
+// -----------------------------------------------------
+
 import java.io.*;
 
 import java.lang.StringBuilder;
@@ -46,6 +53,7 @@ class Driver {
 	* a record with a syntax error is read.
 	* 
 	* @author Philippe Lizotte
+	* @author Sami Khalayli
 	*/
 	public static void do_part1() {
 		Scanner s;
@@ -435,39 +443,41 @@ class Driver {
 	* 
 	* Afterwards, an interactive book navigation system begins to run.
 	*
-	* The main menu gives three options:
+	* The main menu gives three options.
 	* 
-	* - The first option opens its own sub-menu. By entering a positive integer, 
-	*   the current record and the following (n-1) records are displayed. If
-	*   there are less than n records until the end of the file, then every
-	*   record from the current record to the end of the file are displayed with
-	*   an indicative message. By entering a negative integer, the current record
-	*   and the preceeding (|n|-1) records are displayed. Similarly, if there
-    *   aren't enough records preceeding the current one, all possible records
-	*	are displayed with an indicitive message than the beginning of the file
-	*   has been reached. In both cases, the final record displayed becomes the
-	*   new current record for future prompts. Entering 0 will return to the main
-	*   menu.
+	* The first option opens its own sub-menu. By entering a positive integer, 
+	* the current record and the following (n-1) records are displayed. If
+	* there are less than n records until the end of the file, then every
+	* record from the current record to the end of the file are displayed with
+	* an indicative message that the end of the file has been reached. By
+	* entering a negative integer, the current record
+	* and the preceeding (|n|-1) records are displayed. Similarly, if there
+    * aren't enough records preceeding the current one, all possible records
+	* are displayed with an indicitive message that the beginning of the file
+	* has been reached. In both cases, the final record displayed becomes the
+	* new current record for future prompts. Entering 0 will return to the main
+	* menu.
 	*   
-	* - The second option displays a numbered list of all of the available files
-	*   to browse. When the user enters a number, that file will be used for future
-	*   record browsing until the file is changed again.
-	*
-	* - The third option exits the program.
+	* The second option displays a numbered list of all of the available files
+	* to browse. When the user enters a number, the book array extracted from
+	* the selected file will be used for future record browsing until the file
+	* is changed again.
+	* 
+	* The third option exits the program.
 	*/
 	public static void do_part3(Scanner consoleScanner) {
 		// First, deserialize the binary book array objects from part 2 and store them in a 2D array.
 		
 		String inputDir = "part2_output/";
 		String[] inputFiles = {
-				"Cartoons_Comics.csv.ser",
-				"Hobbies_Collectibles.csv.ser",
-				"Movies_TV_Books.csv.ser",
-				"Music_Radio_Books.csv.ser",
-				"Nostalgia_Eclectic_Books.csv.ser",
-				"Old_Time_Radio.csv.ser",
-				"Sports_Sports_Memorabilia.csv.ser",
-				"Trains_Planes_Automobiles.csv.ser"
+			"Cartoons_Comics.csv.ser",
+			"Hobbies_Collectibles.csv.ser",
+			"Movies_TV_Books.csv.ser",
+			"Music_Radio_Books.csv.ser",
+			"Nostalgia_Eclectic_Books.csv.ser",
+			"Old_Time_Radio.csv.ser",
+			"Sports_Sports_Memorabilia.csv.ser",
+			"Trains_Planes_Automobiles.csv.ser"
 		};
 		
 		ObjectInputStream ois = null;
@@ -646,15 +656,16 @@ class Driver {
 
 	/**
 	* Main function.
-	* - Calls the "main" parts of the driver
-	* - Also contains some console commands to make the application more intuitive for a user.
+	* 
+	* Calls the "main" parts of the driver.
+	* Also contains some console commands to make the application more intuitive for a user.
 	*/
 	public static void main(String[] args) {
 		Scanner s = new Scanner(System.in);
 		
 		clearConsole();
 		System.out.println("Welcone to this book validator and browser!");
-		System.out.println("Developped by Philippe Lizotte and Sami Khalayli (please fix this if I spelled it wrong -Phil)");
+		System.out.println("Developped by Philippe Lizotte and Sami Khalayli");
 		s.nextLine();
 		clearConsole();
 		

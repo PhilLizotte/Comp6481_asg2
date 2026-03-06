@@ -1,11 +1,12 @@
-import java.io.Serializable;
-import Exc.*;
-
 // -----------------------------------------------------
 // Assignment 2
-// Part 1
-// Written by: Philippe Lizotte - 40261140
-// ----------------------------------------------------- 
+// COMP 6481
+// Written by: Philippe Lizotte 40261140, Sami Khalayli 40327380
+// Due Date: March 6th, 2026
+// -----------------------------------------------------
+
+import java.io.Serializable;
+import Exc.*;
 
 // This is a class with 6 properties, each with getters and setters.
 // - It also keeps track of how many books have been created in all.
